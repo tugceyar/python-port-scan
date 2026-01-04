@@ -3,15 +3,14 @@ import ipaddress
 import socket
 from concurrent.futures import ThreadPoolExecutor
 
-PORTS = [22, 80, 443]
-TIMEOUT = 0.5
+TIMEOUT = 0.3
 RESULTS = []
 
 def banner():
     print("""
- █████╗ ██╗   ██╗██████╗  █████
+ █████╗ ██╗   ██╗██████╗  █████╗ 
 ██╔══██╗██║   ██║██╔══██╗██╔══██╗
-███████║██║   ██║█    ██ ███████║
+███████║██║   ██║█     █╔███████║
 ██╔══██║╚██╗ ██╔╝██╔══██╗██╔══██║
 ██║  ██║ ╚████╔╝ ██████╔╝██║  ██║
 ╚═╝  ╚═╝  ╚═══╝  ╚═════╝ ╚═╝  ╚═╝
@@ -25,7 +24,7 @@ def ping(ip):
 
 def scan_ports(ip):
     open_ports = []
-    for port in PORTS:
+    for port in range(1, 65536):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(TIMEOUT)
@@ -47,18 +46,18 @@ def scan_host(ip):
 
 def scan_network(network):
     print(f"\n Taranan Network: {network}\n")
-    with ThreadPoolExecutor(max_workers=50) as executor:
+    with ThreadPoolExecutor(max_workers=20) as executor:
         for ip in ipaddress.IPv4Network(network, strict=False):
             executor.submit(scan_host, ip)
 
 def print_table():
-    print("\n{:<16} {:<10} {:<20}".format("IP ADRESİ", "DURUM", "AÇIK PORTLAR"))
-    print("-" * 50)
+    print("\n{:<16} {:<10} {:<30}".format("IP ADRESİ", "DURUM", "AÇIK PORTLAR"))
+    print("-" * 65)
     for ip, status, ports in RESULTS:
-        print("{:<16} {:<10} {:<20}".format(ip, status, ports))
+        print("{:<16} {:<10} {:<30}".format(ip, status, ports))
 
 if __name__ == "__main__":
     banner()
-    network = input("Network gir (örnek: 192.168.1.0/24): ")
+    network = input("Network gir (örnek: 10.10.10.0/24): ")
     scan_network(network)
     print_table()
